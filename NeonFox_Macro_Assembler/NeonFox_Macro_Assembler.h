@@ -1,6 +1,6 @@
 #include <stdio.h> 
 #include <stdlib.h> 
-#include "stdint.h"
+#include <stdint.h>
 #include <string.h>
 
 //Represents a line of the source code after initial parsing.
