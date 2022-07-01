@@ -42,8 +42,7 @@ int main(int argc, char** argv)
 	source_segment_head->source_head = NULL;
 	
 	//Parse program arguments
-	int arg = 1;
-	char flag[5];
+	unsigned int arg = 1;
 	if(argc == 1)
 	{
 		printf("Usage: -ASM <source file> -BIN <output binary> -COE <output coe file> -MIF <output mif file> -DEBUG\n");
@@ -51,36 +50,28 @@ int main(int argc, char** argv)
 		printf("-DEBUG is optional\n");
 		exit(1);
 	}
-	while(arg < argc)
+	while(arg < (unsigned int)argc)
 	{
 		if(argv[arg][0] == '-')
 		{
-			for(unsigned int d = 0; d < 4; ++d)
-			{
-				flag[d] = argv[arg][d];
-				if(flag[d] == 0x00)
-					break;
-				if((flag[d] > 0x60) & (flag[d] < 0x7b))
-					flag[d] = flag[d] - 0x20;
-			}
-			flag[4] = 0x00;
-			if(str_comp_partial(asm_string, flag))
+			to_caps(argv[arg]);
+			if(str_comp_partial(asm_string, argv[arg]))
 			{
 				asm_index = ++arg;
 			}
-			else if(str_comp_partial(bin_string, flag))
+			else if(str_comp_partial(bin_string, argv[arg]))
 			{
 				bin_index = ++arg;
 			}
-			else if(str_comp_partial(coe_string, flag))
+			else if(str_comp_partial(coe_string, argv[arg]))
 			{
 				coe_index = ++arg;
 			}
-			else if(str_comp_partial(mif_string, flag))
+			else if(str_comp_partial(mif_string, argv[arg]))
 			{
 				mif_index = ++arg;
 			}
-			else if(str_comp_partial(debug_string, flag))
+			else if(str_comp_partial(debug_string, argv[arg]))
 			{
 				debug_enable = 0xFF;
 			}
@@ -91,7 +82,7 @@ int main(int argc, char** argv)
 			asm_index = arg++;
 		}
 	}
-	if(arg > argc)
+	if(arg > (unsigned int)argc)
 	{
 		printf("Invalid arguments!\n");
 		exit(1);
@@ -108,7 +99,6 @@ int main(int argc, char** argv)
 	}
 
 	//Load source file
-	printf("Loading file %s\n", argv[asm_index]);
 	load_file(argv[asm_index], head);
 	
 	//Replace includes with source
@@ -131,19 +121,19 @@ int main(int argc, char** argv)
 	
 			unsigned int start = 0;
 			unsigned int end = 0;
-			for(int i = 0; line[i]; i++)
+			for(unsigned int i = 0; line[i]; i++)
 			{
 				if (line[i] == '"')
 				{
-					start = i+1;
+					start = i + 1;
 					break;
 				}
 			}
-			for(int i = start; line[i]; i++)
+			for(unsigned int i = start; line[i]; i++)
 			{
 				if (line[i] == '"')
 				{
-					end = i-1;
+					end = i - 1;
 					break;
 				}
 			}
@@ -163,7 +153,6 @@ int main(int argc, char** argv)
 			}
 			include_name_buf[buf_i]='\0';
 			
-			printf("Loading file %s\n", include_name_buf);
 			load_file(include_name_buf, new_head);
 			include_merge(prev_node, current_node, new_head);
 			free(current_node->s_label);
@@ -459,14 +448,14 @@ int main(int argc, char** argv)
 		if(current_node == NULL)
 			break;
 		//get mnemonic index
-		for(int d = 0; d <= N_MNEMONICS; ++d)
+		for(unsigned int d = 0; d <= N_MNEMONICS; ++d)
 		{
 			if(d == N_MNEMONICS)
 			{
 				printf("Invalid mnemonic or key word: %s in line: %lu in file: %s\n", current_node->s_line, current_node->n_line, name_table[current_node->name_index]);
 				exit(1);
 			}
-			for(int i = 0; d < N_MNEMONICS; ++i)
+			for(unsigned int i = 0; d < N_MNEMONICS; ++i)
 			{
 				if((mnemonics[d][i] == 0x00) && (current_node->s_line[i] == ' ' || current_node->s_line[i] == '\t' || current_node->s_line[i] == 0x00))
 				{
@@ -504,7 +493,7 @@ int main(int argc, char** argv)
 		current_source_segment = current_source_segment->next;
 		current_source_segment->next = NULL;
 		//get offset
-		for(int d = 0; 1; ++d)
+		for(unsigned int d = 0; 1; ++d)
 		{
 			if(current_node->s_line[current_node->mnemonic_end + d] == 0x00)
 			{
@@ -513,22 +502,22 @@ int main(int argc, char** argv)
 			}
 			if(current_node->s_line[current_node->mnemonic_end + d] == '@')	//octal
 			{
-				current_source_segment->offset = strtol((current_node->s_line + current_node->mnemonic_end + d + 1), NULL, 8);
+				current_source_segment->offset = (unsigned long)strtol((current_node->s_line + current_node->mnemonic_end + d + 1), NULL, 8);
 				break;
 			}
 			if(current_node->s_line[current_node->mnemonic_end + d] == '$')	//hexadecimal
 			{
-				current_source_segment->offset = strtol((current_node->s_line + current_node->mnemonic_end + d + 1), NULL, 16);
+				current_source_segment->offset = (unsigned long)strtol((current_node->s_line + current_node->mnemonic_end + d + 1), NULL, 16);
 				break;
 			}
 			if(current_node->s_line[current_node->mnemonic_end + d] == '%')	//binary
 			{
-				current_source_segment->offset = strtol((current_node->s_line + current_node->mnemonic_end + d + 1), NULL, 2);
+				current_source_segment->offset = (unsigned long)strtol((current_node->s_line + current_node->mnemonic_end + d + 1), NULL, 2);
 				break;
 			}
 			if((0x30 <= (current_node->s_line[current_node->mnemonic_end + d])) && (0x39 >= (current_node->s_line[current_node->mnemonic_end + d])))	//decimal
 			{
-				current_source_segment->offset = strtol((current_node->s_line + current_node->mnemonic_end + d), NULL, 10);
+				current_source_segment->offset = (unsigned long)strtol((current_node->s_line + current_node->mnemonic_end + d), NULL, 10);
 				break;
 			}
 		}
@@ -607,106 +596,106 @@ int main(int argc, char** argv)
 			switch(current_source->mnemonic_index)
 			{
 				case 0:		// ADD
-					m_add(current_source, current_instruction, source_segment_head);
+					m_add(current_source, current_instruction);
 					break;
 				case 1:		// ADDC
-					m_addc(current_source, current_instruction, source_segment_head);
+					m_addc(current_source, current_instruction);
 					break;
 				case 2:		// SUB
-					m_sub(current_source, current_instruction, source_segment_head);
+					m_sub(current_source, current_instruction);
 					break;
 				case 3:		// SUBC
-					m_subc(current_source, current_instruction, source_segment_head);
+					m_subc(current_source, current_instruction);
 					break;
 				case 4:		// MOVE
-					m_move(current_source, current_instruction, source_segment_head);
+					m_move(current_source, current_instruction);
 					break;
 				case 5:		// TEST
-					m_test(current_source, current_instruction, source_segment_head);
+					m_test(current_source, current_instruction);
 					break;
 				case 6:		// NOT
-					m_not(current_source, current_instruction, source_segment_head);
+					m_not(current_source, current_instruction);
 					break;
 				case 7:		// ROR
-					m_ror(current_source, current_instruction, source_segment_head);
+					m_ror(current_source, current_instruction);
 					break;
 				case 8:		// ROL
-					m_rol(current_source, current_instruction, source_segment_head);
+					m_rol(current_source, current_instruction);
 					break;
 				case 9:		// AND
-					m_and(current_source, current_instruction, source_segment_head);
+					m_and(current_source, current_instruction);
 					break;
 				case 10:	// XOR
-					m_xor(current_source, current_instruction, source_segment_head);
+					m_xor(current_source, current_instruction);
 					break;
 				case 11:	// OR
-					m_or(current_source, current_instruction, source_segment_head);
+					m_or(current_source, current_instruction);
 					break;
 				case 12:	// CALL 
-					m_call(current_source, current_instruction, source_segment_head);
+					m_call(current_source, current_instruction);
 					break;
 				case 13:	// CALLX
-					m_jmp(current_source, current_instruction, source_segment_head);
+					m_jmp(current_source, current_instruction);
 					break;
 				case 14:	// CALLL
-					m_calll(current_source, current_instruction, source_segment_head);
+					m_calll(current_source, current_instruction);
 					break;
 				case 15:	// CALLLX
-					m_jmpl(current_source, current_instruction, source_segment_head);
+					m_jmpl(current_source, current_instruction);
 					break;
 				case 16:	// RET 
-					m_ret(current_source, current_instruction, source_segment_head);
+					m_ret(current_source, current_instruction);
 					break;
 				case 17:	// RETX
-					m_jmp(current_source, current_instruction, source_segment_head);
+					m_jmp(current_source, current_instruction);
 					break;
 				case 18:	// RETL 
-					m_retl(current_source, current_instruction, source_segment_head);
+					m_retl(current_source, current_instruction);
 					break;
 				case 19:	// RETLX
-					m_jmpl(current_source, current_instruction, source_segment_head);
+					m_jmpl(current_source, current_instruction);
 					break;
 				case 20:	// JMP
-					m_jmp(current_source, current_instruction, source_segment_head);
+					m_jmp(current_source, current_instruction);
 					break;
 				case 21:	// JMPL
-					m_jmpl(current_source, current_instruction, source_segment_head);
+					m_jmpl(current_source, current_instruction);
 					break;
 				case 22:	// NOP 
-					m_nop(current_source, current_instruction, source_segment_head);
+					m_nop(current_instruction);
 					break;
 				case 23:	// BRZ
-					m_brz(current_source, current_instruction, source_segment_head);
+					m_brz(current_source, current_instruction);
 					break;
 				case 24:	// BRN
-					m_brn(current_source, current_instruction, source_segment_head);
+					m_brn(current_source, current_instruction);
 					break;
 				case 25:	// BRP 
-					m_brp(current_source, current_instruction, source_segment_head);
+					m_brp(current_source, current_instruction);
 					break;
 				case 26:	// BRA
-					m_bra(current_source, current_instruction, source_segment_head);
+					m_bra(current_source, current_instruction);
 					break;
 				case 27:	// BRNZ 
-					m_brnz(current_source, current_instruction, source_segment_head);
+					m_brnz(current_source, current_instruction);
 					break;
 				case 28:	// BRNN
-					m_brnn(current_source, current_instruction, source_segment_head);
+					m_brnn(current_source, current_instruction);
 					break;
 				case 29:	// BRNP 
-					m_brnp(current_source, current_instruction, source_segment_head);
+					m_brnp(current_source, current_instruction);
 					break;
 				case 30:	// LIM 
-					m_lim(current_source, current_instruction, source_segment_head);
+					m_lim(current_source, current_instruction);
 					break;
 				case 31:	// BITT 
-					m_bitt(current_source, current_instruction, source_segment_head);
+					m_bitt(current_source, current_instruction);
 					break;
 				case 32:	//DATA
-					p_data(current_source, current_instruction, source_segment_head);
+					p_data(current_source, current_instruction);
 					break;
 				default:
-					p_error(current_source, current_instruction, source_segment_head);
+					p_error(current_source);
 					break;
 			}//end case
 		}//end for
@@ -761,14 +750,15 @@ int main(int argc, char** argv)
 	
 	if(bin_index)
 	{
-		unsigned int written = 0;
+		unsigned long written = 0;
 		FILE *f = fopen(argv[bin_index], "wb");
 		while (written < prg_size)
 		{
-			written += fwrite(output_arr + written, sizeof(uint8_t), prg_size - written, f);
+			written += (unsigned long)fwrite(output_arr + written, sizeof(uint8_t), prg_size - written, f);
 			if (written == 0)
 			{
 				printf("Error writing output file!\n");
+				exit(1);
 			}
 		}
 		fclose(f);
@@ -783,6 +773,7 @@ int main(int argc, char** argv)
 
 void load_file(char* file_name, linked_line* head)
 {
+	printf("Loading file %s\n", file_name);
 	linked_line* current_node = head;
 	unsigned int line_start = 0;
 	unsigned int line_end = 0;
@@ -810,13 +801,14 @@ void load_file(char* file_name, linked_line* head)
 	{
 		++current_source_line;
 		//convert to all caps
-		for(int i = 0; i < 256; ++i)
+		/*for(int i = 0; i < 256; ++i)
 		{
 			if(current_line[i] == 0x00)
 				break;
 			if((current_line[i] > 0x60) & (current_line[i] < 0x7b))
 				current_line[i] = current_line[i] - 0x20;
-		}
+		}*/
+		to_caps(current_line);
 		if(current_line[0] != ';')
 		{
 			if((current_line[0] > 0x40) && (current_line[0] < 0x5b))	//alpha char
@@ -984,32 +976,32 @@ void include_merge(linked_line* prev_node, linked_line* include_node, linked_lin
 	}
 }
 
-void m_add(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_add(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x00, current_source, current_instruction, source_segment_head);
+	assemble_data(0x00, current_source, current_instruction);
 }
 
-void m_addc(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_addc(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x01, current_source, current_instruction, source_segment_head);
+	assemble_data(0x01, current_source, current_instruction);
 }
 
-void m_sub(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_sub(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x02, current_source, current_instruction, source_segment_head);
+	assemble_data(0x02, current_source, current_instruction);
 }
 
-void m_subc(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_subc(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x03, current_source, current_instruction, source_segment_head);
+	assemble_data(0x03, current_source, current_instruction);
 }
 
-void m_move(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_move(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x04, current_source, current_instruction, source_segment_head);
+	assemble_data(0x04, current_source, current_instruction);
 }
 
-void m_test(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_test(linked_source* current_source, linked_instruction* current_instruction)
 {
 	remove_spaces(current_source->s_operands);
 	char* first = NULL;
@@ -1017,7 +1009,7 @@ void m_test(linked_source* current_source, linked_instruction* current_instructi
 	char* third = NULL;
 	unsigned long source;
 	//unsigned long dest;
-	unsigned long hl;
+	uint8_t hl;
 
 	int n_operands = split_operands(current_source->s_operands, &first, &second, &third);
 
@@ -1043,8 +1035,8 @@ void m_test(linked_source* current_source, linked_instruction* current_instructi
 	source = reg_machine_val(second, current_source->n_line, current_source->name_index);
 	//dest = reg_machine_val(third, current_source->n_line, current_source->name_index);
 
-	current_instruction->instruction_high = 0x40 | (hl << 2) | ((source & 0x1F) >> 3);
-	current_instruction->instruction_low = ((source & 0x07) << 5) | (source & 0x1F);
+	current_instruction->instruction_high = (uint8_t)(0x40 | (hl << 2) | (uint8_t)((source & 0x1F) >> 3));
+	current_instruction->instruction_low = (uint8_t)(((source & 0x07) << 5) | (source & 0x1F));
 	//debug output
 	if(debug_enable)
 		printf("%lX\t%X %X\t%s\t%s %s\n", 
@@ -1055,37 +1047,37 @@ void m_test(linked_source* current_source, linked_instruction* current_instructi
 		first, second);
 }
 
-void m_not(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_not(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x05, current_source, current_instruction, source_segment_head);
+	assemble_data(0x05, current_source, current_instruction);
 }
 
-void m_ror(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_ror(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x06, current_source, current_instruction, source_segment_head);
+	assemble_data(0x06, current_source, current_instruction);
 }
 
-void m_rol(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_rol(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x07, current_source, current_instruction, source_segment_head);
+	assemble_data(0x07, current_source, current_instruction);
 }
 
-void m_and(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_and(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x08, current_source, current_instruction, source_segment_head);
+	assemble_data(0x08, current_source, current_instruction);
 }
 
-void m_xor(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_xor(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x09, current_source, current_instruction, source_segment_head);
+	assemble_data(0x09, current_source, current_instruction);
 }
 
-void m_or(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_or(linked_source* current_source, linked_instruction* current_instruction)
 {
-	assemble_data(0x0A, current_source, current_instruction, source_segment_head);
+	assemble_data(0x0A, current_source, current_instruction);
 }
 
-void m_call(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_call(linked_source* current_source, linked_instruction* current_instruction)
 {
 	current_instruction->instruction_high = 0xB0;
 	current_instruction->instruction_low = 0x00;
@@ -1100,14 +1092,14 @@ void m_call(linked_source* current_source, linked_instruction* current_instructi
 	}
 }
 
-void m_calll(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_calll(linked_source* current_source, linked_instruction* current_instruction)
 {
 	remove_spaces(current_source->s_operands);
 	char* first = NULL;
 	char* second = NULL;
 	char* third = NULL;
 	unsigned long immediate_value;
-	unsigned long hl;
+	uint8_t hl;
 
 	int n_operands = split_operands(current_source->s_operands, &first, &second, &third);
 
@@ -1128,10 +1120,10 @@ void m_calll(linked_source* current_source, linked_instruction* current_instruct
 		exit(1);
 	}
 
-	immediate_value = label_or_immediate_value(second, source_segment_head, current_source->n_line, current_source->name_index);
+	immediate_value = label_or_immediate_value(second, current_source->n_line, current_source->name_index);
 
-	current_instruction->instruction_high = 0xB0 | (hl << 2);
-	current_instruction->instruction_low = immediate_value & 0xFF;
+	current_instruction->instruction_high = (uint8_t)(0xB0 | (hl << 2));
+	current_instruction->instruction_low = (uint8_t)(immediate_value & 0xFF);
 	//debug output
 	if(debug_enable)
 	{
@@ -1144,7 +1136,7 @@ void m_calll(linked_source* current_source, linked_instruction* current_instruct
 	}
 }
 
-void m_ret(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_ret(linked_source* current_source, linked_instruction* current_instruction)
 {
 	current_instruction->instruction_high = 0xB2;
 	current_instruction->instruction_low = 0x00;
@@ -1159,14 +1151,14 @@ void m_ret(linked_source* current_source, linked_instruction* current_instructio
 	}
 }
 
-void m_retl(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_retl(linked_source* current_source, linked_instruction* current_instruction)
 {
 	remove_spaces(current_source->s_operands);
 	char* first = NULL;
 	char* second = NULL;
 	char* third = NULL;
 	unsigned long immediate_value;
-	unsigned long hl;
+	uint8_t hl;
 
 	int n_operands = split_operands(current_source->s_operands, &first, &second, &third);
 
@@ -1187,10 +1179,10 @@ void m_retl(linked_source* current_source, linked_instruction* current_instructi
 		exit(1);
 	}
 
-	immediate_value = label_or_immediate_value(second, source_segment_head, current_source->n_line, current_source->name_index);
+	immediate_value = label_or_immediate_value(second, current_source->n_line, current_source->name_index);
 
-	current_instruction->instruction_high = 0xB2 | (hl << 2);
-	current_instruction->instruction_low = immediate_value & 0xFF;
+	current_instruction->instruction_high = (uint8_t)(0xB2 | (hl << 2));
+	current_instruction->instruction_low = (uint8_t)(immediate_value & 0xFF);
 	//debug output
 	if(debug_enable)
 	{
@@ -1203,7 +1195,7 @@ void m_retl(linked_source* current_source, linked_instruction* current_instructi
 	}
 }
 
-void m_jmp(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_jmp(linked_source* current_source, linked_instruction* current_instruction)
 {
 	current_instruction->instruction_high = 0xB1;
 	current_instruction->instruction_low = 0x00;
@@ -1218,14 +1210,14 @@ void m_jmp(linked_source* current_source, linked_instruction* current_instructio
 	}
 }
 
-void m_jmpl(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_jmpl(linked_source* current_source, linked_instruction* current_instruction)
 {
 	remove_spaces(current_source->s_operands);
 	char* first = NULL;
 	char* second = NULL;
 	char* third = NULL;
 	unsigned long immediate_value;
-	unsigned long hl;
+	uint8_t hl;
 
 	int n_operands = split_operands(current_source->s_operands, &first, &second, &third);
 
@@ -1246,9 +1238,9 @@ void m_jmpl(linked_source* current_source, linked_instruction* current_instructi
 		exit(1);
 	}
 
-	immediate_value = label_or_immediate_value(second, source_segment_head, current_source->n_line, current_source->name_index);
+	immediate_value = label_or_immediate_value(second, current_source->n_line, current_source->name_index);
 
-	current_instruction->instruction_high = 0xB1 | (hl << 2);
+	current_instruction->instruction_high = (uint8_t)(0xB1 | (hl << 2));
 	current_instruction->instruction_low = immediate_value & 0xFF;
 	//debug output
 	if(debug_enable)
@@ -1262,7 +1254,7 @@ void m_jmpl(linked_source* current_source, linked_instruction* current_instructi
 	}
 }
 
-void m_nop(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_nop(linked_instruction* current_instruction)
 {
 	current_instruction->instruction_high = 0xC0;
 	current_instruction->instruction_low = 0x00;
@@ -1271,16 +1263,16 @@ void m_nop(linked_source* current_source, linked_instruction* current_instructio
 		printf("%lX\t%X %X\tNOP\n", current_instruction->address >> 1, current_instruction->instruction_high, current_instruction->instruction_low);
 }
 
-void m_brz(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_brz(linked_source* current_source, linked_instruction* current_instruction)
 {
 	char* operands = current_source->s_operands;
 	unsigned long immediate_value;
 	long branch_offset;
 	remove_spaces(operands);
-	immediate_value = label_or_immediate_value(operands, source_segment_head, current_source->n_line, current_source->name_index);
-	branch_offset = immediate_value - (current_instruction->address >> 1);
-	current_instruction->instruction_high = 0xC8 | ((branch_offset >> 8) & 0x03);
-	current_instruction->instruction_low = branch_offset & 0xFF;
+	immediate_value = label_or_immediate_value(operands, current_source->n_line, current_source->name_index);
+	branch_offset = (long int)(immediate_value - (current_instruction->address >> 1));
+	current_instruction->instruction_high = (uint8_t)(0xC8 | ((branch_offset >> 8) & 0x03));
+	current_instruction->instruction_low = (uint8_t)(branch_offset & 0xFF);
 	if((branch_offset > 511) || (branch_offset < -512))
 		printf("Warning: BRZ instruction at line %lu in file %s cannot reach target!\n", current_source->n_line, name_table[current_source->name_index]);
 	//debug output
@@ -1288,16 +1280,16 @@ void m_brz(linked_source* current_source, linked_instruction* current_instructio
 		printf("%lX\t%X %X\tBRZ\t%s (%lX)\n", current_instruction->address >> 1, current_instruction->instruction_high, current_instruction->instruction_low, operands, immediate_value);
 }
 
-void m_brn(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_brn(linked_source* current_source, linked_instruction* current_instruction)
 {
 	char* operands = current_source->s_operands;
 	unsigned long immediate_value;
 	long branch_offset;
 	remove_spaces(operands);
-	immediate_value = label_or_immediate_value(operands, source_segment_head, current_source->n_line, current_source->name_index);
-	branch_offset = immediate_value - (current_instruction->address >> 1);
-	current_instruction->instruction_high = 0xC4 | ((branch_offset >> 8) & 0x03);
-	current_instruction->instruction_low = branch_offset & 0xFF;
+	immediate_value = label_or_immediate_value(operands, current_source->n_line, current_source->name_index);
+	branch_offset = (long int)(immediate_value - (current_instruction->address >> 1));
+	current_instruction->instruction_high = (uint8_t)(0xC4 | ((branch_offset >> 8) & 0x03));
+	current_instruction->instruction_low = (uint8_t)(branch_offset & 0xFF);
 	if((branch_offset > 511) || (branch_offset < -512))
 		printf("Warning: BRN instruction at line %lu in file %s cannot reach target!\n", current_source->n_line, name_table[current_source->name_index]);
 	//debug output
@@ -1305,16 +1297,16 @@ void m_brn(linked_source* current_source, linked_instruction* current_instructio
 		printf("%lX\t%X %X\tBRN\t%s (%lX)\n", current_instruction->address >> 1, current_instruction->instruction_high, current_instruction->instruction_low, operands, immediate_value);
 }
 
-void m_brp(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_brp(linked_source* current_source, linked_instruction* current_instruction)
 {
 	char* operands = current_source->s_operands;
 	unsigned long immediate_value;
 	long branch_offset;
 	remove_spaces(operands);
-	immediate_value = label_or_immediate_value(operands, source_segment_head, current_source->n_line, current_source->name_index);
-	branch_offset = immediate_value - (current_instruction->address >> 1);
-	current_instruction->instruction_high = 0xCC | ((branch_offset >> 8) & 0x03);
-	current_instruction->instruction_low = branch_offset & 0xFF;
+	immediate_value = label_or_immediate_value(operands, current_source->n_line, current_source->name_index);
+	branch_offset = (long int)(immediate_value - (current_instruction->address >> 1));
+	current_instruction->instruction_high = (uint8_t)(0xCC | ((branch_offset >> 8) & 0x03));
+	current_instruction->instruction_low = (uint8_t)(branch_offset & 0xFF);
 	if((branch_offset > 511) || (branch_offset < -512))
 		printf("Warning: BRP instruction at line %lu in file %s cannot reach target!\n", current_source->n_line, name_table[current_source->name_index]);
 	//debug output
@@ -1322,16 +1314,16 @@ void m_brp(linked_source* current_source, linked_instruction* current_instructio
 		printf("%lX\t%X %X\tBRP\t%s (%lX)\n", current_instruction->address >> 1, current_instruction->instruction_high, current_instruction->instruction_low, operands, immediate_value);
 }
 
-void m_bra(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_bra(linked_source* current_source, linked_instruction* current_instruction)
 {
 	char* operands = current_source->s_operands;
 	unsigned long immediate_value;
 	long branch_offset;
 	remove_spaces(operands);
-	immediate_value = label_or_immediate_value(operands, source_segment_head, current_source->n_line, current_source->name_index);
-	branch_offset = immediate_value - (current_instruction->address >> 1);
-	current_instruction->instruction_high = 0xD0 | ((branch_offset >> 8) & 0x03);
-	current_instruction->instruction_low = branch_offset & 0xFF;
+	immediate_value = label_or_immediate_value(operands, current_source->n_line, current_source->name_index);
+	branch_offset = (long int)(immediate_value - (current_instruction->address >> 1));
+	current_instruction->instruction_high = (uint8_t)(0xD0 | ((branch_offset >> 8) & 0x03));
+	current_instruction->instruction_low = (uint8_t)(branch_offset & 0xFF);
 	if((branch_offset > 511) || (branch_offset < -512))
 		printf("Warning: BRA instruction at line %lu in file %s cannot reach target!\n", current_source->n_line, name_table[current_source->name_index]);
 	//debug output
@@ -1339,16 +1331,16 @@ void m_bra(linked_source* current_source, linked_instruction* current_instructio
 		printf("%lX\t%X %X\tBRA\t%s (%lX)\n", current_instruction->address >> 1, current_instruction->instruction_high, current_instruction->instruction_low, operands, immediate_value);
 }
 
-void m_brnz(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_brnz(linked_source* current_source, linked_instruction* current_instruction)
 {
 	char* operands = current_source->s_operands;
 	unsigned long immediate_value;
 	long branch_offset;
 	remove_spaces(operands);
-	immediate_value = label_or_immediate_value(operands, source_segment_head, current_source->n_line, current_source->name_index);
-	branch_offset = immediate_value - (current_instruction->address >> 1);
-	current_instruction->instruction_high = 0xD8 | ((branch_offset >> 8) & 0x03);
-	current_instruction->instruction_low = branch_offset & 0xFF;
+	immediate_value = label_or_immediate_value(operands, current_source->n_line, current_source->name_index);
+	branch_offset = (long int)(immediate_value - (current_instruction->address >> 1));
+	current_instruction->instruction_high = (uint8_t)(0xD8 | ((branch_offset >> 8) & 0x03));
+	current_instruction->instruction_low = (uint8_t)(branch_offset & 0xFF);
 	if((branch_offset > 511) || (branch_offset < -512))
 		printf("Warning: BRNZ instruction at line %lu in file %s cannot reach target!\n", current_source->n_line, name_table[current_source->name_index]);
 	//debug output
@@ -1356,16 +1348,16 @@ void m_brnz(linked_source* current_source, linked_instruction* current_instructi
 		printf("%lX\t%X %X\tBRNZ\t%s (%lX)\n", current_instruction->address >> 1, current_instruction->instruction_high, current_instruction->instruction_low, operands, immediate_value);
 }
 
-void m_brnn(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_brnn(linked_source* current_source, linked_instruction* current_instruction)
 {
 	char* operands = current_source->s_operands;
 	unsigned long immediate_value;
 	long branch_offset;
 	remove_spaces(operands);
-	immediate_value = label_or_immediate_value(operands, source_segment_head, current_source->n_line, current_source->name_index);
-	branch_offset = immediate_value - (current_instruction->address >> 1);
-	current_instruction->instruction_high = 0xD4 | ((branch_offset >> 8) & 0x03);
-	current_instruction->instruction_low = branch_offset & 0xFF;
+	immediate_value = label_or_immediate_value(operands, current_source->n_line, current_source->name_index);
+	branch_offset = (long int)(immediate_value - (current_instruction->address >> 1));
+	current_instruction->instruction_high = (uint8_t)(0xD4 | ((branch_offset >> 8) & 0x03));
+	current_instruction->instruction_low = (uint8_t)(branch_offset & 0xFF);
 	if((branch_offset > 511) || (branch_offset < -512))
 		printf("Warning: BRNN instruction at line %lu in file %s cannot reach target!\n", current_source->n_line, name_table[current_source->name_index]);
 	//debug output
@@ -1373,16 +1365,16 @@ void m_brnn(linked_source* current_source, linked_instruction* current_instructi
 		printf("%lX\t%X %X\tBRNN\t%s (%lX)\n", current_instruction->address >> 1, current_instruction->instruction_high, current_instruction->instruction_low, operands, immediate_value);
 }
 
-void m_brnp(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_brnp(linked_source* current_source, linked_instruction* current_instruction)
 {
 	char* operands = current_source->s_operands;
 	unsigned long immediate_value;
 	long branch_offset;
 	remove_spaces(operands);
-	immediate_value = label_or_immediate_value(operands, source_segment_head, current_source->n_line, current_source->name_index);
-	branch_offset = immediate_value - (current_instruction->address >> 1);
-	current_instruction->instruction_high = 0xDC | ((branch_offset >> 8) & 0x03);
-	current_instruction->instruction_low = branch_offset & 0xFF;
+	immediate_value = label_or_immediate_value(operands, current_source->n_line, current_source->name_index);
+	branch_offset = (long int)(immediate_value - (current_instruction->address >> 1));
+	current_instruction->instruction_high = (uint8_t)(0xDC | ((branch_offset >> 8) & 0x03));
+	current_instruction->instruction_low = (uint8_t)(branch_offset & 0xFF);
 	if((branch_offset > 511) || (branch_offset < -512))
 		printf("Warning: BRNP instruction at line %lu in file %s cannot reach target!\n", current_source->n_line, name_table[current_source->name_index]);
 	//debug output
@@ -1390,7 +1382,7 @@ void m_brnp(linked_source* current_source, linked_instruction* current_instructi
 		printf("%lX\t%X %X\tBRNP\t%s (%lX)\n", current_instruction->address >> 1, current_instruction->instruction_high, current_instruction->instruction_low, operands, immediate_value);
 }
 
-void m_lim(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_lim(linked_source* current_source, linked_instruction* current_instruction)
 {
 	remove_spaces(current_source->s_operands);
 	char* first = NULL;
@@ -1398,7 +1390,7 @@ void m_lim(linked_source* current_source, linked_instruction* current_instructio
 	char* third = NULL;
 	unsigned long immediate;
 	unsigned long dest;
-	unsigned long hl;
+	uint8_t hl;
 
 	int n_operands = split_operands(current_source->s_operands, &first, &second, &third);
 
@@ -1419,10 +1411,10 @@ void m_lim(linked_source* current_source, linked_instruction* current_instructio
 		exit(1);
 	}
 
-	immediate = label_or_immediate_value(third, source_segment_head, current_source->n_line, current_source->name_index);
+	immediate = label_or_immediate_value(third, current_source->n_line, current_source->name_index);
 	dest = reg_machine_val(second, current_source->n_line, current_source->name_index);
 
-	current_instruction->instruction_high = 0xE0 | (hl << 2) | (dest & 0x03);
+	current_instruction->instruction_high = (uint8_t)(0xE0 | (hl << 2) | (uint8_t)(dest & 0x03));
 	current_instruction->instruction_low = immediate & 0xFF;
 
 	if((dest >> 2) != 0x04)
@@ -1439,7 +1431,7 @@ void m_lim(linked_source* current_source, linked_instruction* current_instructio
 	}
 }
 
-void m_bitt(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void m_bitt(linked_source* current_source, linked_instruction* current_instruction)
 {
 	remove_spaces(current_source->s_operands);
 	char* first = NULL;
@@ -1456,7 +1448,7 @@ void m_bitt(linked_source* current_source, linked_instruction* current_instructi
 		exit(1);
 	}
 
-	bit = label_or_immediate_value(third, source_segment_head, current_source->n_line, current_source->name_index);
+	bit = label_or_immediate_value(third, current_source->n_line, current_source->name_index);
 	if(first[0] == 'H')
 		bit += 8;
 	else if(first[0] == 'S')
@@ -1469,8 +1461,8 @@ void m_bitt(linked_source* current_source, linked_instruction* current_instructi
 	
 	source = reg_machine_val(second, current_source->n_line, current_source->name_index);
 
-	current_instruction->instruction_high = 0xF0 | ((source >> 3) & 0x03);
-	current_instruction->instruction_low = ((source & 0x07) << 5) | (bit & 0x0F);
+	current_instruction->instruction_high = (uint8_t)(0xF0 | ((source >> 3) & 0x03));
+	current_instruction->instruction_low = (uint8_t)(((source & 0x07) << 5) | (bit & 0x0F));
 	//debug output
 	if(debug_enable)
 	{
@@ -1483,13 +1475,13 @@ void m_bitt(linked_source* current_source, linked_instruction* current_instructi
 	}
 }
 
-void p_data(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void p_data(linked_source* current_source, linked_instruction* current_instruction)
 {
 	remove_spaces(current_source->s_operands);
 	unsigned long immediate;
 	
-	immediate = label_or_immediate_value(current_source->s_operands, source_segment_head, current_source->n_line, current_source->name_index);
-	current_instruction->instruction_high = (immediate >> 8);
+	immediate = label_or_immediate_value(current_source->s_operands, current_source->n_line, current_source->name_index);
+	current_instruction->instruction_high = (uint8_t)(immediate >> 8);
 	current_instruction->instruction_low = immediate & 0xFF;
 	if(immediate >> 16)
 	{
@@ -1506,13 +1498,13 @@ void p_data(linked_source* current_source, linked_instruction* current_instructi
 	}
 }
 
-void p_error(linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void p_error(linked_source* current_source)
 {
 	printf("invalid mnemonic index in at line %lu in file %s\n", current_source->n_line, name_table[current_source->name_index]);
 	exit(1);
 }
 
-void assemble_data(uint8_t opcode, linked_source* current_source, linked_instruction* current_instruction, linked_source_segment* source_segment_head)
+void assemble_data(uint8_t opcode, linked_source* current_source, linked_instruction* current_instruction)
 {
 	remove_spaces(current_source->s_operands);
 	char* first = NULL;
@@ -1520,7 +1512,7 @@ void assemble_data(uint8_t opcode, linked_source* current_source, linked_instruc
 	char* third = NULL;
 	unsigned long source;
 	unsigned long dest;
-	unsigned long hl;
+	uint8_t hl;
 
 	int n_operands = split_operands(current_source->s_operands, &first, &second, &third);
 
@@ -1546,8 +1538,8 @@ void assemble_data(uint8_t opcode, linked_source* current_source, linked_instruc
 	source = reg_machine_val(second, current_source->n_line, current_source->name_index);
 	dest = reg_machine_val(third, current_source->n_line, current_source->name_index);
 
-	current_instruction->instruction_high = (opcode << 4) | (hl << 2) | ((source & 0x1F) >> 3);
-	current_instruction->instruction_low = ((source & 0x07) << 5) | (dest & 0x1F);
+	current_instruction->instruction_high = (uint8_t)((opcode << 4) | (hl << 2) | (uint8_t)((source & 0x1F) >> 3));
+	current_instruction->instruction_low = (uint8_t)(((source & 0x07) << 5) | (dest & 0x1F));
 	//debug output
 	if(debug_enable)
 	{
@@ -1560,11 +1552,11 @@ void assemble_data(uint8_t opcode, linked_source* current_source, linked_instruc
 	}
 }
 
-long reg_machine_val(char* operand, unsigned long line_num, uint8_t name_index)
+unsigned long reg_machine_val(char* operand, unsigned long line_num, uint8_t name_index)
 {
 	if (operand[0] == 'R') //Register 
 	{
-		return strtol(operand + 1, NULL, 10);
+		return (unsigned long)strtol(operand + 1, NULL, 10);
 	}
 
 	fprintf(stderr, "Invalid register at line: %lu in file %s\n", line_num, name_table[name_index]);
@@ -1573,18 +1565,45 @@ long reg_machine_val(char* operand, unsigned long line_num, uint8_t name_index)
 
 void remove_spaces(char* s)
 {
-    char* d = s;
-    do
-    {
-        while (*d == ' ' || *d == '\t')
-        {
-            ++d;
-        }
+	char* d = s;
+	char prev_char = *d;
+	do
+	{
+		//do not modify substrings inside quotes
+		if(prev_char == 0x22)	//double quates
+		{
+			while(1)
+			{
+				prev_char = (*s++ = *d++);
+				if(!prev_char)
+					return;
+				if(*d == 0x22 && prev_char != 0x5C)
+					break;
+			}
+			prev_char = (*s++ = *d++);
+		}
+		if(prev_char == 0x27)	//single quates
+		{
+			while(1)
+			{
+				prev_char = (*s++ = *d++);
+				if(!prev_char)
+					return;
+				if(*d == 0x27 && prev_char != 0x5C)
+					break;
+			}
+			prev_char = (*s++ = *d++);
+		}
+		while (*d == ' ' || *d == '\t')
+		{
+			++d;
+		}
 		if(*d == ';')
 		{
-	    	*d = '\0';
+			*d = '\0';
 		}
-    } while ((*s++ = *d++));
+		prev_char = (*s++ = *d++);
+	} while (prev_char);
 }
 
 int split_operands(char* operands, char** first, char** second, char** third)
@@ -1609,48 +1628,51 @@ int split_operands(char* operands, char** first, char** second, char** third)
 }
 
 //Returns the value of the label address or the parsed immediate
-unsigned long label_or_immediate_value(char* candidate, linked_source_segment* source_segment_head, unsigned long line_num, uint8_t name_index)
+unsigned long label_or_immediate_value(char* candidate, unsigned long line_num, uint8_t name_index)
 {
 	//is label or has keyword?
 	if((candidate[0] >= 'A' && candidate[0] <= 'Z') || (candidate[0] == '`'))
 	{
 		if(str_comp_partial(candidate, hh_string))
-			return (label_or_immediate_value(candidate + 3, source_segment_head, line_num, name_index) >> 24) & 0xFF;
+			return (label_or_immediate_value(candidate + 3, line_num, name_index) >> 24) & 0xFF;
 		else if(str_comp_partial(candidate, hl_string))
-			return (label_or_immediate_value(candidate + 3, source_segment_head, line_num, name_index) >> 16) & 0xFF;
+			return (label_or_immediate_value(candidate + 3, line_num, name_index) >> 16) & 0xFF;
 		else if(str_comp_partial(candidate, lh_string))
-			return (label_or_immediate_value(candidate + 3, source_segment_head, line_num, name_index) >> 8) & 0xFF;
+			return (label_or_immediate_value(candidate + 3, line_num, name_index) >> 8) & 0xFF;
 		else if(str_comp_partial(candidate, ll_string))
-			return label_or_immediate_value(candidate + 3, source_segment_head, line_num, name_index) & 0xFF;
+			return label_or_immediate_value(candidate + 3, line_num, name_index) & 0xFF;
+		else if(str_comp_partial(candidate, hw_string))
+			return (label_or_immediate_value(candidate + 3, line_num, name_index) >> 16) & 0xFFFF;
+		else if(str_comp_partial(candidate, lw_string))
+			return label_or_immediate_value(candidate + 3, line_num, name_index) & 0xFFFF;
 		else
-			//return get_label_address(source_segment_head, candidate, line_num, name_index);
 			return get_label_value(candidate, line_num, name_index);
 	}
 	//is octal
 	if(candidate[0] == '@')
 	{
-		return strtol((candidate + 1), NULL, 8);
+		return (unsigned long)strtol((candidate + 1), NULL, 8);
 	}
 	//is hex
 	if(candidate[0] == '$')
 	{
-		return strtol((candidate + 1), NULL, 16);
+		return (unsigned long)strtol((candidate + 1), NULL, 16);
 	}
 	//is binary
 	if(candidate[0] == '%')
 	{
-		return strtol((candidate + 1), NULL, 2);
+		return (unsigned long)strtol((candidate + 1), NULL, 2);
 	}
 	//is char
 	if(candidate[0] == '\'')
 	{
 		if(candidate[1] == '\\')
 		{
-			if(candidate[2] == 'S')
-				return ' ';
-			else if(candidate[2] == 'T')
+			//if(candidate[2] == 'S')
+			//	return ' ';
+			if(candidate[2] == 't' || candidate[2] == 'T')
 				return '\t';
-			else if(candidate[2] == 'N')
+			else if(candidate[2] == 'n' || candidate[2] == 'N')
 				return '\n';
 			else if(candidate[2] == '\\')
 				return '\\';
@@ -1664,13 +1686,13 @@ unsigned long label_or_immediate_value(char* candidate, linked_source_segment* s
 		}
 		else
 		{
-			return candidate[1];
+			return (unsigned long)candidate[1];
 		}
 	}
 	//is decimal
 	if((0x30 <= candidate[0]) && (candidate[0] <= 0x39))
 	{
-		return strtol(candidate, NULL, 10);
+		return (unsigned long)strtol(candidate, NULL, 10);
 	}
 	// throw error
 	else
@@ -1893,7 +1915,7 @@ inline void str_replace(char** where, char* s_new, unsigned int word_start, unsi
 	char* old_string = *where;
 	unsigned int old_size = str_size(*where);
 	unsigned int pre_length = word_start;
-	unsigned int word_length = strlen(s_new);
+	unsigned int word_length = (unsigned int)strlen(s_new);
 	unsigned int post_size = old_size - word_end;
 	unsigned int new_size = pre_length + word_length + post_size;
 	char* new_string = (char*)malloc(new_size);
@@ -1927,6 +1949,47 @@ unsigned int str_size(char* s_input)
 			break;
 	}
 	return size;
+}
+
+void to_caps(char* str)
+{
+	unsigned int d = 0;
+	char prev_char = 0x00;
+	while(str[d])
+	{
+		//do not modifiy substrings that appear in quotes
+		if(str[d] == 0x22)	//double quotes
+		{
+			while(1)
+			{
+				++d;
+				if(!str[d])
+					return;
+				if(str[d] == 0x22 && prev_char != 0x5C)
+					break;
+				prev_char = str[d];
+			}
+		}
+		if(str[d] == 0x27)	//single quotes
+		{
+			while(1)
+			{
+				++d;
+				if(!str[d])
+					return;
+				if(str[d] == 0x27 && prev_char != 0x5C)
+					break;
+				prev_char = str[d];
+			}
+		}
+		if(str[d] == ';')	//skip comments
+			return;
+		if((str[d] > 0x60) & (str[d] < 0x7B))
+			str[d] = str[d] - 0x20;
+		prev_char = str[d];
+		++d;
+	}
+	return;
 }
 
 void replace_file_extension(char* new_ext, char* out_name, char* new_name)

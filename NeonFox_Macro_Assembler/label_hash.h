@@ -11,7 +11,7 @@ unsigned int label_map_size;
 unsigned long hash(unsigned char* str)
 {
     unsigned long hash = 5381;
-    int c;
+    unsigned char c;
 
     while ((c = *str++))
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
@@ -31,6 +31,7 @@ void insert_label(char* label, unsigned long n_line, uint8_t name_index, unsigne
 			if(!strcmp(label, current_node->key))
 			{
 				fprintf(stderr, "Label [%s] at line: %lu in file %s has already been declared\n", label, n_line, name_table[name_index]);
+				exit(1);
 			}
 			last_node = current_node;
 			current_node = current_node->next;

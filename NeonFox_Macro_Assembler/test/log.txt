@@ -1,0 +1,84 @@
+found singl quote
+after single quote prev_char is: 20
+ending iteration with prev_char: 27
+ending iteration with prev_char: 0
+Test string: ' '.
+Loading file test.asm
+In p_data before remove_spaces:  'H'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 48
+found singl quote
+In p_data after remove_spaces: 'H'
+In p_data before remove_spaces:  'e'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 65
+found singl quote
+In p_data after remove_spaces: 'e'
+In p_data before remove_spaces:  'l'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 6C
+found singl quote
+In p_data after remove_spaces: 'l'
+In p_data before remove_spaces:  'l'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 6C
+found singl quote
+In p_data after remove_spaces: 'l'
+In p_data before remove_spaces:  'o'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 6F
+found singl quote
+In p_data after remove_spaces: 'o'
+In p_data before remove_spaces:  ' '
+found space
+ending iteration with prev_char: 27
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 0
+In p_data after remove_spaces: ''
+In p_data before remove_spaces:  'w'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 77
+found singl quote
+In p_data after remove_spaces: 'w'
+In p_data before remove_spaces:  'o'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 6F
+found singl quote
+In p_data after remove_spaces: 'o'
+In p_data before remove_spaces:  'r'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 72
+found singl quote
+In p_data after remove_spaces: 'r'
+In p_data before remove_spaces:  'l'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 6C
+found singl quote
+In p_data after remove_spaces: 'l'
+In p_data before remove_spaces:  'd'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 64
+found singl quote
+In p_data after remove_spaces: 'd'
+In p_data before remove_spaces:  '\0'
+found space
+ending iteration with prev_char: 27
+ending iteration with prev_char: 5C
+ending iteration with prev_char: 30
+found singl quote
+In p_data after remove_spaces: '\0'
+Segment: 0
+	 Start address: 0
+	 End address: 11
+Prog size: 24

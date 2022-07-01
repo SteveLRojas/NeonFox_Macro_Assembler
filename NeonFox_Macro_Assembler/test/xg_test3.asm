@@ -1447,18 +1447,18 @@ HEX_INC
 
 TEST_STRING
 	DATA 'H'
-	DATA 'E'
-	DATA 'L'
-	DATA 'L'
-	DATA 'O'
-	DATA '\S'
-	DATA 'W'
-	DATA 'O'
-	DATA 'R'
-	DATA 'L'
-	DATA 'D'
+	DATA 'e'
+	DATA 'l'
+	DATA 'l'
+	DATA 'o'
+	DATA ' '
+	DATA 'w'
+	DATA 'o'
+	DATA 'r'
+	DATA 'l'
+	DATA 'd'
 	DATA '!'
-	DATA $00
+	DATA '\n'
 
 
 

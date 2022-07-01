@@ -1,0 +1,62 @@
+Loading file test.asm
+1     ORG 0
+3 STRINGS    DATA `HW HELLO_STR
+4     DATA `LW HELLO_STR
+5     DATA `HW FOO_STR
+6     DATA `LW FOO_STR
+7     DATA `HW BAR_STR
+8     DATA `LW BAR_STR
+11 HELLO_STR    DATA 'H'
+12     DATA 'e'
+13     DATA 'l'
+14     DATA 'l'
+15     DATA 'o'
+16     DATA ' '
+17     DATA 'w'
+18     DATA 'o'
+19     DATA 'r'
+20     DATA 'l'
+21     DATA 'd'
+22     DATA '\0'
+25 FOO_STR    DATA 'f'
+26     DATA 'o'
+27     DATA 'o'
+28     DATA '\0'
+31 BAR_STR    DATA 'b'
+32     DATA 'a'
+33     DATA 'r'
+34     DATA '\0'
+STRINGS
+0	0 0	DATA
+1	0 6	DATA
+2	0 0	DATA
+3	0 12	DATA
+4	0 0	DATA
+5	0 16	DATA
+HELLO_STR
+6	0 48	DATA
+7	0 65	DATA
+8	0 6C	DATA
+9	0 6C	DATA
+A	0 6F	DATA
+B	0 20	DATA
+C	0 77	DATA
+D	0 6F	DATA
+E	0 72	DATA
+F	0 6C	DATA
+10	0 64	DATA
+11	0 0	DATA
+FOO_STR
+12	0 66	DATA
+13	0 6F	DATA
+14	0 6F	DATA
+15	0 0	DATA
+BAR_STR
+16	0 62	DATA
+17	0 61	DATA
+18	0 72	DATA
+19	0 0	DATA
+Segment: 0
+	 Start address: 0
+	 End address: 25
+Prog size: 52
