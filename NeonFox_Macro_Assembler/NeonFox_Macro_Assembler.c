@@ -408,9 +408,15 @@ int main(int argc, char** argv)
 				current_macro_copy_line->next = current_node->next;
 				//free copy line head
 				free(macro_copy_line_head);
-				//free current node
+				//keep macro reference label (if any)
 				if(current_node->s_label)
-					free(current_node->s_label);
+                {
+                    if(!prev_node->next->s_label)
+                        prev_node->next->s_label = current_node->s_label;
+                    else
+                        free(current_node->s_label);
+                }
+                //free current node
 				free(current_node->s_line);
 				free(current_node);
 				current_node = prev_node;

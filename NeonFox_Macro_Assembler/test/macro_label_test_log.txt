@@ -1,0 +1,141 @@
+Loading file macro_label_test.asm
+Loading file NEONFOX.INC
+61 MACRO     M_LDWI SEL, WORD, REGISTER
+62        LIM L, R16, SEL L WORD
+63        LIM H, R16, SEL H WORD
+64        MOVE W, R16, REGISTER
+67 MACRO     M_LDWLP ADDRESS, REGISTER
+68        LIM L, R16, `LL ADDRESS
+69        LIM H, R16, `LH ADDRESS
+70        MOVE W, R16, R20
+71        LIM L, R16, `HL ADDRESS
+72        LIM H, R16, `HH ADDRESS
+73        MOVE W, R16, R21
+74        MOVE W, R24, REGISTER
+Found instance of macro M_LDWI in line 78 of file macro_label_test.asm
+Found instance of macro M_LDWI in line 79 of file macro_label_test.asm
+Found instance of macro M_LDWI in line 84 of file macro_label_test.asm
+5     ORG 0
+7     NOP
+8     NOP
+9     NOP
+10     NOP
+12     NOP
+13     NOP
+14     NOP
+15     NOP
+17     NOP
+18     NOP
+19     NOP
+20     NOP
+22     NOP
+23     NOP
+24     NOP
+25     NOP
+27     NOP
+28     NOP
+29     NOP
+30     NOP
+32     NOP
+33     NOP
+34     NOP
+35     NOP
+37     NOP
+38     NOP
+39     NOP
+40     NOP
+42     NOP
+43     NOP
+44     BRA MAIN
+45     NOP
+48 HELLO_STR    DATA 'H'
+49     DATA 'e'
+50     DATA 'l'
+51     DATA 'l'
+52     DATA 'o'
+53     DATA ' '
+54     DATA 'w'
+55     DATA 'o'
+56     DATA 'r'
+57     DATA 'l'
+58     DATA 'd'
+59     DATA '\0'
+62 MAIN    LIM L, R16, `L L FOO
+63     LIM H, R16, `L H FOO
+64     MOVE W, R16, R26
+62     LIM L, R16, `H L FOO
+63     LIM H, R16, `H H FOO
+64     MOVE W, R16, R27
+80     NOP
+81     BRA MAIN
+62 FOO    LIM L, R16, `L L 1000
+63     LIM H, R16, `L H 1000
+64     MOVE W, R16, R16
+85     ADD W, R1, R1
+86     RET
+87     NOP
+0	C0 0	NOP
+1	C0 0	NOP
+2	C0 0	NOP
+3	C0 0	NOP
+4	C0 0	NOP
+5	C0 0	NOP
+6	C0 0	NOP
+7	C0 0	NOP
+8	C0 0	NOP
+9	C0 0	NOP
+A	C0 0	NOP
+B	C0 0	NOP
+C	C0 0	NOP
+D	C0 0	NOP
+E	C0 0	NOP
+F	C0 0	NOP
+10	C0 0	NOP
+11	C0 0	NOP
+12	C0 0	NOP
+13	C0 0	NOP
+14	C0 0	NOP
+15	C0 0	NOP
+16	C0 0	NOP
+17	C0 0	NOP
+18	C0 0	NOP
+19	C0 0	NOP
+1A	C0 0	NOP
+1B	C0 0	NOP
+1C	C0 0	NOP
+1D	C0 0	NOP
+1E	D0 E	BRA	MAIN (2C)
+1F	C0 0	NOP
+HELLO_STR
+20	0 48	DATA
+21	0 65	DATA
+22	0 6C	DATA
+23	0 6C	DATA
+24	0 6F	DATA
+25	0 20	DATA
+26	0 77	DATA
+27	0 6F	DATA
+28	0 72	DATA
+29	0 6C	DATA
+2A	0 64	DATA
+2B	0 0	DATA
+MAIN
+2C	E4 34	LIM	L R16 `LLFOO
+2D	E8 0	LIM	H R16 `LHFOO
+2E	4E 1A	MOVE	W R16 R26
+2F	E4 0	LIM	L R16 `HLFOO
+30	E8 0	LIM	H R16 `HHFOO
+31	4E 1B	MOVE	W R16 R27
+32	C0 0	NOP
+33	D3 F9	BRA	MAIN (2C)
+FOO
+34	E4 E8	LIM	L R16 `LL1000
+35	E8 3	LIM	H R16 `LH1000
+36	4E 10	MOVE	W R16 R16
+37	C 21	ADD	W R1 R1
+38	B2 0	RET
+39	C0 0	NOP
+Segment: 0
+	 Start address: 0
+	 End address: 57
+Prog size: 116
