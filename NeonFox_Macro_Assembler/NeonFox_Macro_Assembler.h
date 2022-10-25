@@ -141,6 +141,7 @@ void free_instruction(linked_instruction* current_instruction);
 unsigned long get_binary_segment_end(linked_binary_segment* current_binary_segment);
 unsigned long get_binary_size(linked_binary_segment* binary_segment_head);
 int str_comp_partial(const char* str1, const char* str2);
+int str_comp_word(const char* str1, const char* str2);
 int str_find_word(char* where, char* what, unsigned int* start, unsigned int* end);
 void str_replace(char** where, char* s_new, unsigned int word_start, unsigned int word_end);
 unsigned int str_size(char* s_input);

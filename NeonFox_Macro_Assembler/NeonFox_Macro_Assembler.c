@@ -320,7 +320,7 @@ int main(int argc, char** argv)
 			if(current_node == NULL)
 				break;
 			char* s_line = current_node->s_line;	//we can modify this only if it is a macro instance
-			if(str_comp_partial(s_line, macro_name))
+			if(str_comp_word(s_line, macro_name))
 			{
 				printf("Found instance of macro %s in line %lu of file %s\n", macro_name, current_node->n_line, name_table[current_node->name_index]);
 				//create copy of macro code
@@ -1866,6 +1866,21 @@ int str_comp_partial(const char* str1, const char* str2)
 			return 0;
 	}
 	return 1;
+}
+
+int str_comp_word(const char* str1, const char* str2)
+{
+	unsigned int i;
+	for(i = 0; str1[i] && str2[i]; ++i)
+	{
+		if(str1[i] != str2[i])
+			return 0;
+	}
+	
+	char next = str1[i] | str2[i];
+	if(next == 0x00 || next == '\t' || next == ' ')
+		return 1;
+	return 0;
 }
 
 inline void find_and_replace(linked_line* current_node, char* s_replace, char* s_new)
