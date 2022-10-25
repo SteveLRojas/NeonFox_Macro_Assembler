@@ -51,4 +51,5 @@ Revision 5:
 	
 Revision 6:
     Added support for labels on macro references.
+    Fixed bug in macro processor (use str_comp_word instead of str_comp_partial).
 	
