@@ -83,7 +83,7 @@ const char coe_string[] = "-COE";
 const char mif_string[] = "-MIF";
 char include_name_buf[256];
 char* name_table[256];
-uint8_t debug_enable;
+uint8_t debug_enable = 0;
 unsigned int asm_index = 0;
 unsigned int bin_index = 0;
 unsigned int coe_index = 0;
