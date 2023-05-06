@@ -24,6 +24,7 @@ int main(int argc, char** argv)
 	head->n_line = 0xffffffff;
 	head->s_label = NULL;
 	head->s_line = NULL;
+	head->next = NULL;
 
 	macro_head->formal_parameters = NULL;
 	macro_head->line_head = NULL;
